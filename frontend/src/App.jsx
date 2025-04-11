@@ -13,9 +13,11 @@ import { useEffect } from 'react'
 
 import { Toaster } from 'react-hot-toast'
 import { Loader } from 'lucide-react'
+import { useThemeStore } from './store/useThemeStore.js'
 
 function App() {
   const  { authUser, checkAuth, isCheckingAuth } = useAuthStore()
+  const {theme} = useThemeStore()
 
   useEffect(() => {
     checkAuth()
@@ -31,7 +33,7 @@ function App() {
     )
   }
   return (
-    <>
+    <div data-theme={theme}>
       <Navbar />
 
       <Routes>
@@ -43,7 +45,7 @@ function App() {
       </Routes>
 
       <Toaster />
-    </>
+    </div>
   )
 }
 
