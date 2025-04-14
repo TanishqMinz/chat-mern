@@ -21,6 +21,11 @@ function App() {
 
   console.log({ onlineUsers })
 
+  // Applies theme to entire document(fixed default theme being applied )
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);  
+
   useEffect(() => {
     checkAuth()
   }, [checkAuth])

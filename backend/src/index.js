@@ -14,7 +14,7 @@ dotenv.config()
 
 
 
-app.use(express.json())
+app.use(express.json({limit: '10MB'}))
 app.use(cookieParser())
 
 // remember to change origin after deploying
