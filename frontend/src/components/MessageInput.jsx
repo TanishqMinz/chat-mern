@@ -6,41 +6,60 @@ import toast from "react-hot-toast"
 
 const MessageInput = () => {
   const [text, setText] = useState("")
-  const [imagePreview, setImagePreview] = useState(null)
+  const [mediaPreview, setMediaPreview] = useState(null)
+  const [mediaType, setMediaType] = useState(null)
   const fileInputRef = useRef(null)
   const { sendMessage } = useChatStore()
 
-  const handleImageChange = (event) => {
+  const handleMediaChange = (event) => {
     const file = event.target.files[0]
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file")
+    if (!file) return 
+
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+
+    if (!isImage && !isVideo ) {
+      toast.error("Please select an image or video file")
       return 
     }
 
     const reader = new FileReader()
     reader.onloadend = () => {
-      setImagePreview(reader.result)
+      setMediaPreview(reader.result)
+      setMediaType(isImage? "image" : "video")
     }
     reader.readAsDataURL(file)
   }
 
-  const removeImage = () => {
-    setImagePreview(null)
+  const removeMedia = () => {
+    setMediaPreview(null)
+    setMediaType(null)
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
+  // TODO: Add functionality to limit upload size (on frontend)
   const handleSendMessage = async (event) => {
     event.preventDefault()
-    if (!text.trim() && !imagePreview) return
+    if (!text.trim() && !mediaPreview) return
 
     try {
-      await sendMessage({
-        text: text.trim(),
-        image: imagePreview,
-      })
+      const messageContent = {
+        text: text.trim()
+      }
+
+      if (mediaPreview){
+        if (mediaType === "image"){
+          messageContent.image = mediaPreview
+        }
+        else {
+          messageContent.video = mediaPreview
+        }
+      }
+
+      await sendMessage(messageContent)
 
       setText("")
-      setImagePreview(null)
+      removeMedia()
       if (fileInputRef.current) fileInputRef.current.value = ""
     } catch (error) {
         console.error("Failed to send message:", error)
@@ -49,16 +68,23 @@ const MessageInput = () => {
 
   return (
     <div className="p-4 w-full">
-            {imagePreview && (
+            {mediaPreview && (
         <div className="mb-3 flex items-center gap-2">
           <div className="relative">
+            {mediaPreview.startsWith("data:video") ? (
+            <video
+              src={mediaPreview}
+              className="w-20 h-20 object-cover rounded-lg border border-zinc-700"
+            />
+          ) : (
             <img
-              src={imagePreview}
+              src={mediaPreview}
               alt="Preview"
               className="w-20 h-20 object-cover rounded-lg border border-zinc-700"
             />
+            )}
             <button
-              onClick={removeImage}
+              onClick={removeMedia}
               className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300
               flex items-center justify-center"
               type="button"
@@ -80,15 +106,15 @@ const MessageInput = () => {
           />
           <input
             type="file"
-            accept="image/*"
+            accept="image/*,video/*"
             className="hidden"
             ref={fileInputRef}
-            onChange={handleImageChange}
+            onChange={handleMediaChange}
           />
           <button 
             type="button"
             className={`hidden sm:flex btn btn-circle 
-                      ${imagePreview ? "text-emerald-500" : "text-zinc-400" }`}
+                      ${mediaPreview ? "text-emerald-500" : "text-zinc-400" }`}
             onClick={() => fileInputRef.current?.click()}>
             <Image size={20} />
           </button>
@@ -96,7 +122,7 @@ const MessageInput = () => {
         <button 
           type="submit"
           className="btn btn-sm btn-circle"
-          disabled={!text.trim() && !imagePreview}
+          disabled={!text.trim() && !mediaPreview}
         >
           <Send size={22} />
         </button>

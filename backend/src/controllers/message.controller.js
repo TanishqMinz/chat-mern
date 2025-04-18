@@ -37,21 +37,31 @@ export const getMessages = async (req,res) => {
 
 export const sendMessage = async (req,res) => {
     try {
-        const { text, image } = req.body
+        const { text, image, video } = req.body
         const { id:receiverId } = req.params
         const senderId = req.user._id
 
-        let imageUrl
+        let imageUrl, videoUrl
         if (image) {
-            const uploadResponse = await cloudinary.uploader.upload(image)
+            const uploadResponse = await cloudinary.uploader.upload(image, {resource_type: "image"})
             imageUrl = uploadResponse.secure_url
+        }
+
+        if (video) {
+            const uploadResponse = await cloudinary.uploader.upload(video, {resource_type: "video"})
+            videoUrl = uploadResponse.secure_url
+        }
+
+        if (!text.trim() && !imageUrl && !videoUrl) {
+            return res.status(400).json({ error: "Message cannot be empty" })
         }
 
         const newMessage = new Message({
             senderId,
             receiverId,
             text,
-            image: imageUrl
+            image: imageUrl,
+            video: videoUrl
         })
 
         await newMessage.save()
