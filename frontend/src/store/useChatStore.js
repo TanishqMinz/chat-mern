@@ -205,8 +205,11 @@ export const useChatStore = create((set,get) => ({
 
             socket.emit("call:request", { toUserId: selectedUser._id })
         } catch (error) {
+            const message = error?.name
+                ? `Microphone error: ${error.name}`
+                : "Microphone access is required to start a call"
             console.error("Call error", error)
-            toast.error("Microphone access is required to start a call")
+            toast.error(message)
             get().cleanupCall()
         }
     },
@@ -232,8 +235,11 @@ export const useChatStore = create((set,get) => ({
                 set({ pendingOffer: null })
             }
         } catch (error) {
+            const message = error?.name
+                ? `Microphone error: ${error.name}`
+                : "Microphone access is required to accept a call"
             console.error("Accept call error", error)
-            toast.error("Microphone access is required to accept a call")
+            toast.error(message)
             socket.emit("call:reject", { toUserId: callUserId })
             get().cleanupCall()
         }
