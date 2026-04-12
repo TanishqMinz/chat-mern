@@ -1,10 +1,12 @@
-import { X } from "lucide-react"
+import { Phone, X } from "lucide-react"
 import { useAuthStore } from "../store/useAuthStore"
 import { useChatStore } from "../store/useChatStore"
 
 const ChatHeader = () => {
-    const { selectedUser, setSelectedUser } = useChatStore()
+    const { selectedUser, setSelectedUser, startCall, callState } = useChatStore()
     const { onlineUsers } = useAuthStore()
+    const isOnline = onlineUsers.includes(selectedUser._id)
+    const canCall = callState === "idle" && isOnline
  
   return (
     <div className="p-2.5 border-b border-base-300">
@@ -27,9 +29,19 @@ const ChatHeader = () => {
             </div>
 
             {/* Close */}
-            <button onClick={() => setSelectedUser(null)}>
-                <X />
-            </button>
+            <div className="flex items-center gap-2">
+                <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={startCall}
+                    disabled={!canCall}
+                    title={isOnline ? "Start voice call" : "User is offline"}
+                >
+                    <Phone className="size-4" />
+                </button>
+                <button className="btn btn-ghost btn-sm" onClick={() => setSelectedUser(null)}>
+                    <X className="size-4" />
+                </button>
+            </div>
 
         </div>
     </div>

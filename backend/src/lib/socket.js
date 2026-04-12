@@ -17,6 +17,13 @@ export function getReceiverSocketId(userId)  {
 
 const userSocketMap = {}
 
+const emitToUser = (userId, event, payload) => {
+    const receiverSocketId = getReceiverSocketId(userId)
+    if (receiverSocketId) {
+        io.to(receiverSocketId).emit(event, payload)
+    }
+}
+
 io.on("connection", (socket) => {
     console.log("A user connected", socket.id)
 
@@ -24,6 +31,41 @@ io.on("connection", (socket) => {
     if(userId) userSocketMap[userId] = socket.id
 
     io.emit("getOnlineUsers",Object.keys(userSocketMap))
+
+    socket.on("call:request", ({ toUserId }) => {
+        if (!userId || !toUserId) return
+        emitToUser(toUserId, "call:request", { fromUserId: userId })
+    })
+
+    socket.on("call:accept", ({ toUserId }) => {
+        if (!userId || !toUserId) return
+        emitToUser(toUserId, "call:accept", { fromUserId: userId })
+    })
+
+    socket.on("call:reject", ({ toUserId }) => {
+        if (!userId || !toUserId) return
+        emitToUser(toUserId, "call:reject", { fromUserId: userId })
+    })
+
+    socket.on("call:end", ({ toUserId }) => {
+        if (!userId || !toUserId) return
+        emitToUser(toUserId, "call:end", { fromUserId: userId })
+    })
+
+    socket.on("webrtc:offer", ({ toUserId, offer }) => {
+        if (!userId || !toUserId || !offer) return
+        emitToUser(toUserId, "webrtc:offer", { fromUserId: userId, offer })
+    })
+
+    socket.on("webrtc:answer", ({ toUserId, answer }) => {
+        if (!userId || !toUserId || !answer) return
+        emitToUser(toUserId, "webrtc:answer", { fromUserId: userId, answer })
+    })
+
+    socket.on("webrtc:ice-candidate", ({ toUserId, candidate }) => {
+        if (!userId || !toUserId || !candidate) return
+        emitToUser(toUserId, "webrtc:ice-candidate", { fromUserId: userId, candidate })
+    })
 
     socket.on("disconnect", () => {
         console.log("A user disconnected", socket.id)

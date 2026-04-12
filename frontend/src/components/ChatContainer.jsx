@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react"
 import { useChatStore } from "../store/useChatStore"
 import ChatHeader from "./ChatHeader"
+import CallOverlay from "./CallOverlay"
+import CallAudio from "./CallAudio"
 import MessageInput from "./MessageInput"
 import MessageSkeleton from "./skeletons/MessageSkeleton"
 import { useAuthStore } from "../store/useAuthStore"
@@ -28,16 +30,20 @@ const ChatContainer = () => {
   }, [messages])
 
   if(isMessagesLoading) return (
-    <div className="flex-1 flex flex-col overflow-auto">
+    <div className="flex-1 flex flex-col overflow-auto relative">
       <ChatHeader />
+      <CallOverlay />
+      <CallAudio />
       <MessageSkeleton />
       <MessageInput />
     </div>
   )
   
   return (
-    <div className="flex-1 flex flex-col overflow-auto">
+    <div className="flex-1 flex flex-col overflow-auto relative">
       <ChatHeader />
+      <CallOverlay />
+      <CallAudio />
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
