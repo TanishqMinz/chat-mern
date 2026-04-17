@@ -4,10 +4,15 @@ import express from "express"
 
 const app = express()
 const server = http.createServer(app)
+const corsOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
 
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:5173"]
+        origin: corsOrigins,
+        credentials: true
     }
 })
 
@@ -32,19 +37,19 @@ io.on("connection", (socket) => {
 
     io.emit("getOnlineUsers",Object.keys(userSocketMap))
 
-    socket.on("call:request", ({ toUserId }) => {
+    socket.on("call:request", ({ toUserId, callType = "audio" }) => {
         if (!userId || !toUserId) return
-        emitToUser(toUserId, "call:request", { fromUserId: userId })
+        emitToUser(toUserId, "call:request", { fromUserId: userId, callType })
     })
 
-    socket.on("call:accept", ({ toUserId }) => {
+    socket.on("call:accept", ({ toUserId, callType = "audio" }) => {
         if (!userId || !toUserId) return
-        emitToUser(toUserId, "call:accept", { fromUserId: userId })
+        emitToUser(toUserId, "call:accept", { fromUserId: userId, callType })
     })
 
-    socket.on("call:reject", ({ toUserId }) => {
+    socket.on("call:reject", ({ toUserId, reason }) => {
         if (!userId || !toUserId) return
-        emitToUser(toUserId, "call:reject", { fromUserId: userId })
+        emitToUser(toUserId, "call:reject", { fromUserId: userId, reason })
     })
 
     socket.on("call:end", ({ toUserId }) => {

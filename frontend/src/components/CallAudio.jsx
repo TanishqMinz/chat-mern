@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react"
-import { useChatStore } from "../store/useChatStore"
+import { useCallStore } from "../store/useCallStore"
 
 const CallAudio = () => {
-  const { remoteStream } = useChatStore()
+  const { remoteStream } = useCallStore()
   const audioRef = useRef(null)
 
   useEffect(() => {

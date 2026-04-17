@@ -1,9 +1,11 @@
-import { Phone, X } from "lucide-react"
+import { Phone, Video, X } from "lucide-react"
 import { useAuthStore } from "../store/useAuthStore"
 import { useChatStore } from "../store/useChatStore"
+import { useCallStore } from "../store/useCallStore"
 
 const ChatHeader = () => {
-    const { selectedUser, setSelectedUser, startCall, callState } = useChatStore()
+    const { selectedUser, setSelectedUser } = useChatStore()
+    const { startCall, callState } = useCallStore()
     const { onlineUsers } = useAuthStore()
     const isOnline = onlineUsers.includes(selectedUser._id)
     const canCall = callState === "idle" && isOnline
@@ -32,11 +34,19 @@ const ChatHeader = () => {
             <div className="flex items-center gap-2">
                 <button
                     className="btn btn-ghost btn-sm"
-                    onClick={startCall}
+                    onClick={() => startCall(selectedUser._id, "audio")}
                     disabled={!canCall}
                     title={isOnline ? "Start voice call" : "User is offline"}
                 >
                     <Phone className="size-4" />
+                </button>
+                <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => startCall(selectedUser._id, "video")}
+                    disabled={!canCall}
+                    title={isOnline ? "Start video call" : "User is offline"}
+                >
+                    <Video className="size-4" />
                 </button>
                 <button className="btn btn-ghost btn-sm" onClick={() => setSelectedUser(null)}>
                     <X className="size-4" />

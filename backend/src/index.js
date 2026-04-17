@@ -11,6 +11,10 @@ import { connectDB } from "./lib/db.js";
 import { app, server } from "./lib/socket.js";
 
 dotenv.config()
+const corsOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
 
 
 
@@ -19,10 +23,15 @@ app.use(cookieParser())
 
 // remember to change origin after deploying
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: corsOrigins,
     credentials: true
 })
 )
+
+app.use((req, res, next) => {
+    res.setHeader("Permissions-Policy", "microphone=(self)")
+    next()
+})
 
 const PORT = process.env.PORT || 5001
 const __dirname = path.resolve()

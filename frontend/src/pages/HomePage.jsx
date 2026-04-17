@@ -1,12 +1,15 @@
 import ChatContainer from "../components/ChatContainer"
+import CallOverlay from "../components/CallOverlay"
 import NoChatSelected from "../components/NoChatSelected"
 import Sidebar from "../components/Sidebar"
 import { useChatStore } from "../store/useChatStore"
+import { useCallStore } from "../store/useCallStore"
 import { useEffect } from "react"
 import { useAuthStore } from "../store/useAuthStore"
 
 const HomePage = () => {
-  const { selectedUser, subscribeToCalls, unsubscribeFromCalls } = useChatStore()
+  const { selectedUser } = useChatStore()
+  const { subscribeToCalls, unsubscribeFromCalls, handleCallPageLeave } = useCallStore()
   const { socket } = useAuthStore()
 
   useEffect(() => {
@@ -14,6 +17,20 @@ const HomePage = () => {
     subscribeToCalls()
     return () => unsubscribeFromCalls()
   }, [socket, subscribeToCalls, unsubscribeFromCalls])
+
+  useEffect(() => {
+    const handlePageHide = () => {
+      handleCallPageLeave()
+    }
+
+    window.addEventListener("pagehide", handlePageHide)
+    window.addEventListener("beforeunload", handlePageHide)
+
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide)
+      window.removeEventListener("beforeunload", handlePageHide)
+    }
+  }, [handleCallPageLeave])
 
   return (
     <div className="h-screen bg-base-200">
@@ -23,10 +40,10 @@ const HomePage = () => {
             <Sidebar />
 
             {!selectedUser ? <NoChatSelected /> : <ChatContainer />}
-
           </div>
         </div>
       </div>
+      <CallOverlay />
     </div>
   )
 }
