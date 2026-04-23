@@ -20,6 +20,10 @@ const messageSchema = new mongoose.Schema(
         },
         video: {
             type: String
+        },
+        editedAt: {
+            type: Date,
+            default: null
         }
     },
     { timestamps: true }

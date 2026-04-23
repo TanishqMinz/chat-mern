@@ -6,6 +6,7 @@ import cors from "cors"
 import path from "path"
 
 import authRoutes from "./routes/auth.route.js";
+import aiRoutes from "./routes/ai.route.js";
 import messageRoutes from "./routes/message.route.js";
 import { connectDB } from "./lib/db.js";
 import { app, server } from "./lib/socket.js";
@@ -37,6 +38,7 @@ const PORT = process.env.PORT || 5001
 const __dirname = path.resolve()
 
 app.use("/api/auth", authRoutes)
+app.use("/api/ai", aiRoutes)
 app.use("/api/messages", messageRoutes)
 
 if(process.env.NODE_ENV==="production") {
